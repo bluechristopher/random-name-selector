@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Random Student Selector</title>
+<style>
+    :root {
+        --bg-dark: #050505;
+        --panel-dark: #082a2a;
+        --accent-gold: #d4af37;
+        --text-light: #f5f5f5;
+        --winner-lime: #9bff7a;
+        --error: #f76f68;
+        --shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+        color: var(--text-light);
+        background: radial-gradient(circle at top right, #0c3a3a, #020202 55%);
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding: 40px 20px 92px 20px;
+        overflow-x: hidden;
+    }
+
+    .app {
+        width: min(640px, 100%);
+        background: linear-gradient(145deg, #2a2a2a, #0a0a0a);
+        border: 1px solid rgba(212, 175, 55, 0.18);
+        border-radius: 24px;
+        padding: 32px 32px 40px;
+        position: relative;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+    }
+
+    .app::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 15% -10%, rgba(212, 175, 55, 0.2), transparent 45%);
+        mix-blend-mode: screen;
+        pointer-events: none;
+    }
+
+    header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 28px;
+        position: relative;
+        z-index: 1;
+    }
+
+    h1 {
+        font-size: 1.9rem;
+        letter-spacing: 1.1px;
+        margin: 0;
+        text-transform: uppercase;
+        color: var(--accent-gold);
+    }
+
+    .mode-toggle {
+        border: 1px solid rgba(212, 175, 55, 0.35);
+        background: rgba(12, 58, 58, 0.35);
+        color: var(--accent-gold);
+        padding: 10px 18px;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        backdrop-filter: blur(4px);
+        white-space: nowrap;
+    }
+
+    .mode-toggle:hover {
+        background: rgba(212, 175, 55, 0.15);
+        box-shadow: 0 0 18px rgba(212, 175, 55, 0.2);
+    }
+
+    .panel {
+        background: transparent;
+        border: none;
+        border-radius: 18px;
+        padding: 20px 18px;
+        margin-bottom: 24px;
+        position: relative;
+        z-index: 1;
+    }
+
+    select,
+    textarea {
+        width: 100%;
+        background: rgba(5, 34, 34, 0.82);
+        color: var(--text-light);
+        border: none;
+        border-radius: 12px;
+        padding: 14px 16px;
+        font-size: 1rem;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        font-family: inherit;
+    }
+
+    select {
+        text-align: center;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #e8f5f3;
+    }
+
+    select option {
+        background: #2a2a2a;
+        color: #e8f5f3;
+    }
+
+    /* Default background for select - will be updated by JavaScript */
+    #classSelect {
+        background: linear-gradient(90deg, rgba(20, 80, 20, 0.95), rgba(80, 200, 80, 0.85), rgba(20, 80, 20, 0.95));
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    textarea {
+        min-height: 160px;
+        resize: vertical;
+        line-height: 1.5;
+        font-size: 1.1rem;
+        font-weight: 700;
+    }
+
+    select:focus,
+    textarea:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.18);
+    }
+
+    .textarea-hidden {
+        display: none;
+    }
+
+    .custom-count-btn {
+        width: 100%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 8px;
+        padding: 14px 18px;
+        border-radius: 12px;
+        border: 1px solid rgba(212, 175, 55, 0.28);
+        background: rgba(5, 34, 34, 0.82);
+        color: var(--accent-gold);
+        font-weight: 600;
+        letter-spacing: 0.6px;
+        cursor: pointer;
+        transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        text-align: left;
+    }
+
+    .custom-count-btn:hover {
+        background: rgba(212, 175, 55, 0.12);
+        box-shadow: 0 10px 22px rgba(212, 175, 55, 0.18);
+    }
+
+    .custom-textarea-wrapper {
+        margin-top: 16px;
+        overflow: hidden;
+        transition: max-height 0.35s ease, opacity 0.25s ease;
+        max-height: 0;
+        opacity: 0;
+    }
+
+    .custom-textarea-wrapper.expanded {
+        max-height: 400px;
+        opacity: 1;
+    }
+
+    .slot {
+        background: linear-gradient(180deg, rgba(4, 33, 33, 0.95), rgba(1, 12, 12, 0.95));
+        border: 2px solid rgba(212, 175, 55, 0.35);
+        box-shadow: inset 0 0 25px rgba(212, 175, 55, 0.08), 0 12px 30px rgba(0, 0, 0, 0.35);
+        border-radius: 20px;
+        padding: 32px 24px;
+        text-align: center;
+        margin-bottom: 30px;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.4s ease, padding 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+        user-select: none;
+        cursor: pointer;
+    }
+
+    .slot::before {
+        content: "";
+        position: absolute;
+        inset: -40%;
+        background:
+            radial-gradient(ellipse at 15% 25%, rgba(128, 41, 214, 0.6), transparent 62%) no-repeat,
+            radial-gradient(ellipse at 80% 20%, rgba(0, 139, 167, 0.55), transparent 64%) no-repeat,
+            radial-gradient(ellipse at 55% 85%, rgba(24, 152, 84, 0.5), transparent 66%) no-repeat,
+            radial-gradient(ellipse at 30% 70%, rgba(32, 86, 198, 0.48), transparent 66%) no-repeat,
+            radial-gradient(ellipse at 78% 75%, rgba(206, 118, 35, 0.55), transparent 68%) no-repeat,
+            radial-gradient(ellipse at 45% 40%, rgba(140, 0, 118, 0.55), transparent 58%) no-repeat;
+        background-size: 72% 72%, 70% 70%, 78% 78%, 75% 75%, 70% 70%, 60% 60%;
+        background-position: 0% 0%, 100% 10%, 50% 100%, 15% 95%, 95% 65%, 40% 20%;
+        opacity: 0;
+        filter: blur(26px);
+        mix-blend-mode: screen;
+        transition: opacity 0.35s ease;
+        pointer-events: none;
+        transform-origin: center;
+    }
+
+    .slot::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        border: 1px solid rgba(212, 175, 55, 0.16);
+        pointer-events: none;
+    }
+
+    .slot.spinning .slot-display {
+        animation: pulse 0.75s ease-in-out infinite;
+		opacity: 0.5;
+    }
+
+    .slot.winner {
+        padding: 46px 32px;
+        transform: scale(1.05);
+        border-color: rgba(155, 255, 122, 0.75);
+        box-shadow: 0 20px 55px rgba(102, 255, 178, 0.35), inset 0 0 35px rgba(155, 255, 122, 0.25);
+    }
+
+    .slot.winner::before {
+        opacity: 1;
+        animation: auroraFlow 4s ease-in-out infinite;
+    }
+
+    @keyframes auroraFlow {
+        0% {
+            background-position: 0% 0%, 100% 10%, 50% 100%, 15% 95%, 95% 65%, 40% 20%;
+            transform: rotate(0deg) scale(1);
+        }
+        20% {
+            background-position: 35% 15%, 65% 45%, 20% 75%, 5% 75%, 80% 30%, 30% 25%;
+            transform: rotate(4deg) scale(1.05);
+        }
+        40% {
+            background-position: 55% 65%, 10% 5%, 60% 35%, 25% 100%, 60% 90%, 70% 35%;
+            transform: rotate(-3deg) scale(1.08);
+        }
+        60% {
+            background-position: 25% 90%, 90% 35%, 45% 55%, 75% 85%, 10% 45%, 50% 10%;
+            transform: rotate(2deg) scale(1.04);
+        }
+        80% {
+            background-position: 15% 35%, 55% 70%, 25% 95%, 0% 70%, 85% 40%, 25% 35%;
+            transform: rotate(-4deg) scale(1.07);
+        }
+        100% {
+            background-position: 0% 0%, 100% 10%, 50% 100%, 15% 95%, 95% 65%, 40% 20%;
+            transform: rotate(0deg) scale(1);
+        }
+    }
+
+    .slot-display {
+        font-size: clamp(1.8rem, 4vw, 2.4rem);
+        font-weight: 700;
+        letter-spacing: 1.6px;
+        color: var(--accent-gold);
+        min-height: 2.6em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: color 0.25s ease, font-size 0.35s ease, opacity 0.25s ease;
+        word-wrap: break-word;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        text-align: center;
+    }
+
+    .slot-display.empty {
+        opacity: 0;
+    }
+
+    .slot-display.no-data {
+        color: var(--error);
+    }
+
+    .slot-display.winner {
+        color: white;
+        font-size: clamp(2.2rem, 5vw, 3rem);
+        text-shadow: 0 0 14px rgba(155, 255, 122, 0.55), 0 0 28px rgba(155, 255, 122, 0.35);
+        animation: winnerBounce 0.75s ease-out forwards;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            text-shadow: 0 0 8px rgba(212, 175, 55, 0.35);
+            transform: scale(1);
+        }
+        50% {
+            text-shadow: 0 0 16px rgba(212, 175, 55, 0.6);
+            transform: scale(1.04);
+        }
+    }
+
+    @keyframes winnerBounce {
+        0% { transform: scale(0.85); }
+        40% { transform: scale(1.35); }
+        60% { transform: scale(0.95); }
+        85% { transform: scale(1.15); }
+        100% { transform: scale(1.1); }
+    }
+
+    .controls {
+        display: flex;
+        justify-content: center;
+    }
+
+    .spin-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 16px 36px;
+        font-size: 1.08rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: #020202;
+        background: linear-gradient(135deg, var(--accent-gold), #f6d97a);
+        border: none;
+        border-radius: 14px;
+        cursor: pointer;
+        box-shadow: 0 16px 35px rgba(212, 175, 55, 0.35);
+        transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.25s ease;
+    }
+
+    .spin-btn:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+
+    .spin-btn:not(:disabled):hover {
+        background: linear-gradient(135deg, #ffb347, #ff7033);
+        transform: translateY(-3px) scale(1.06);
+        box-shadow: 0 26px 55px rgba(255, 125, 50, 0.45);
+    }
+
+    .spin-btn svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .spin-btn.spinning svg {
+        animation: spinRotate 1s linear infinite;
+    }
+
+    @keyframes spinRotate {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #3a3a3a;
+        color: var(--text-light);
+        padding: 16px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.95rem;
+        z-index: 1000;
+    }
+
+    .footer-name {
+        font-weight: 500;
+        letter-spacing: 0.5px;
+    }
+
+    .footer-time {
+        font-family: inherit;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--accent-gold);
+    }
+
+    @media (max-width: 580px) {
+        .app {
+            padding: 28px 20px 32px;
+        }
+
+        header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .spin-btn {
+            width: 100%;
+        }
+
+        .controls {
+            width: 100%;
+        }
+
+        .footer {
+            flex-direction: column;
+            gap: 12px;
+            text-align: center;
+            padding: 12px 16px;
+        }
+    }
+	
+	.confetti {
+		position: fixed;
+		width: 4px;
+		height: 4px;
+		pointer-events: none;
+		z-index: 9999;
+		opacity: 1;
+	}
+
+	@keyframes confetti-explode {
+		0% {
+			transform: translate(0, 0) rotateZ(0deg) rotateY(0deg);
+			opacity: 1;
+		}
+		100% {
+			transform: translate(var(--spread-x), calc(var(--spread-y) + 100vh)) rotateZ(720deg) rotateY(360deg);
+			opacity: 0;
+		}
+	}
+
+</style>
+</head>
+<body>
+<div class="app">
+    <header>
+        <h1>Select Student</h1>
+        <button class="mode-toggle" id="modeToggleBtn" type="button">Switch to Custom List</button>
+    </header>
+
+    <section class="panel" id="classPanel">
+        <select id="classSelect"></select>
+    </section>
+
+    <section class="panel textarea-hidden" id="customPanel">
+        <button class="custom-count-btn" type="button" id="customCountBtn">
+            Student Count: <span id="customCount">0</span>
+        </button>
+        <div class="custom-textarea-wrapper" id="customWrapper">
+            <textarea id="customList" placeholder="Jane Doe&#10;John Doe&#10;..."></textarea>
+        </div>
+    </section>
+
+    <section class="slot" id="slot" title="Click to spin">
+        <div class="slot-display" id="slotDisplay">Ready to spin!</div>
+    </section>
+
+    <div class="controls">
+        <button class="spin-btn" id="spinBtn" type="button">
+			<svg viewBox="0 0 24 24" fill="none">
+				<circle cx="12" cy="12" r="8" stroke="#020202" stroke-width="2" fill="none" stroke-dasharray="50.27" stroke-dashoffset="12.57"/>
+			</svg>
+            Spin
+        </button>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="footer-name">© <span id="currentYear"></span> Anderson Serangoon Junior College</div>
+    <div class="footer-time" id="footerTime"></div>
+</footer>
+
+<script>
+	const classData = [
+		{
+			"id": "class-a",
+			"name": "Class A",
+			"students": [
+				"Malcolm Tan",
+				"Andrew Tay",
+				"Rachel Lim",
+				"Brandon Ng",
+				"Melissa Wong",
+				"Darren Chua",
+				"Jasmine Teo",
+				"Kenneth Loh",
+				"Vanessa Ong",
+				"Marcus Yeo",
+				"Nicole Goh",
+				"Ethan Toh",
+				"Sophie Lee",
+				"Adrian Koh",
+				"Priya Pillai",
+				"Jordan Tan",
+				"Samantha Lim",
+				"Isaac Quah",
+				"Fiona Chia",
+				"Nathan Seah",
+				"Chloe Poh",
+				"Ryan Chew",
+				"Gabrielle Soh",
+				"Devon Ooi",
+				"Amelia Wee"
+			]
+		},
+		{
+			"id": "class-b",
+			"name": "Class B",
+			"students": [
+				"Timothy Neo",
+				"Hannah Soo",
+				"Garrett Sim",
+				"Stephanie Lim",
+				"Benjamin Chong",
+				"Kirsten Ang",
+				"Derek Peh",
+				"Jessica Loo",
+				"Gregory Tay",
+				"Amber Kwan",
+				"Jason Loh",
+				"Natalie Ong",
+				"Christopher Chia",
+				"Tanya Quah",
+				"Mitchell Chew",
+				"Victoria Leong",
+				"Zachary Goh",
+				"Isabella Chan",
+				"Aaron Toh",
+				"Kaylee Soh",
+				"Evan Yeo",
+				"Rosie Tan",
+				"Steven Koh",
+				"Sophia Wee",
+				"Kyle Ng"
+			]
+		},
+		{
+			"id": "class-c",
+			"name": "Class C",
+			"students": [
+				"Marcus Ooi",
+				"Vanessa Lua",
+				"Richard Poh",
+				"Priscilla Teo",
+				"Patrick Lim",
+				"Daniela Goh",
+				"Vincent Chiah",
+				"Cheryl Tan",
+				"Sean Kwan",
+				"Linda Yim",
+				"Gary Tah",
+				"Joanne Sng",
+				"Bryan Ong",
+				"Cassandra Koh",
+				"Dominic Seah",
+				"Felicia Loo",
+				"Felix Sim",
+				"Gloria Chia",
+				"Harvey Ong",
+				"Iris Lye",
+				"Ivan Tan",
+				"Jade Tay",
+				"Justin Lim",
+				"Karen Ng",
+				"Lance Toh"
+			]
+		},
+		{
+			"id": "class-d",
+			"name": "Class D",
+			"students": [
+				"Leonard Yong",
+				"Melissa Toh",
+				"Maurice Chua",
+				"Natasha Lim",
+				"Nelson Tay",
+				"Olivia Koh",
+				"Oscar Ang",
+				"Patricia Loh",
+				"Paul Chow",
+				"Quincy Soh",
+				"Randall Tan",
+				"Rebecca Neo",
+				"Roland Chia",
+				"Sheryl Poh",
+				"Stanley Lim",
+				"Tiffany Ooi",
+				"Toby Teo",
+				"Ursula Chong",
+				"Vernon Goh",
+				"Whitney Wee",
+				"Xavier Ng",
+				"Yuki Sim",
+				"Zachary Ong",
+				"Aimee Kwan",
+				"Bradley Toh"
+			]
+		}
+	];
+
+
+    const mode = {
+        PREDEFINED: "predefined",
+        CUSTOM: "custom"
+    };
+
+    let currentMode = mode.PREDEFINED;
+    let isSpinning = false;
+    let spinTimeouts = [];
+
+    const selectionHistory = new Map();
+
+    const classSelectEl = document.getElementById("classSelect");
+    const customListEl = document.getElementById("customList");
+    const modeToggleBtn = document.getElementById("modeToggleBtn");
+    const slotEl = document.getElementById("slot");
+    const slotDisplayEl = document.getElementById("slotDisplay");
+    const spinBtn = document.getElementById("spinBtn");
+    const classPanelEl = document.getElementById("classPanel");
+    const customPanelEl = document.getElementById("customPanel");
+    const customCountBtn = document.getElementById("customCountBtn");
+    const customCountEl = document.getElementById("customCount");
+    const customWrapper = document.getElementById("customWrapper");
+
+    function populateClassSelect() {
+        classSelectEl.innerHTML = classData
+            .map((cls, index) => `<option value="${cls.id}" ${index === 0 ? "selected" : ""}>${cls.name}</option>`)
+            .join("");
+        updateCounts();
+        resetDisplay();
+    }
+
+    function getActiveList() {
+        if (currentMode === mode.PREDEFINED) {
+            const selectedId = classSelectEl.value;
+            const selectedClass = classData.find(cls => cls.id === selectedId);
+            return selectedClass ? [...selectedClass.students] : [];
+        }
+        return customListEl.value
+            .split("\n")
+            .map(name => name.trim())
+            .filter(Boolean);
+    }
+
+    function getHistoryKey() {
+        return currentMode === mode.PREDEFINED ? classSelectEl.value : "custom";
+    }
+
+    function getHistoryEntry(students) {
+        if (!students.length) return null;
+
+        const key = getHistoryKey();
+        const signature = students.join("||");
+        let entry = selectionHistory.get(key);
+
+        if (!entry || entry.signature !== signature) {
+            entry = {
+                signature,
+                queue: [],
+                set: new Set(),
+                limit: 0
+            };
+            selectionHistory.set(key, entry);
+        }
+
+        entry.limit = Math.max(1, Math.floor(students.length * 0.75));
+        while (entry.queue.length > entry.limit) {
+            const removed = entry.queue.shift();
+            entry.set.delete(removed);
+        }
+
+        return entry;
+    }
+
+    function recordSelection(entry, student) {
+        if (!entry) return;
+        if (!entry.set.has(student)) {
+            entry.queue.push(student);
+            entry.set.add(student);
+            if (entry.queue.length > entry.limit) {
+                const removed = entry.queue.shift();
+                entry.set.delete(removed);
+            }
+        }
+    }
+
+    function updateCounts() {
+        const customStudents = customListEl.value
+            .split("\n")
+            .map(name => name.trim())
+            .filter(Boolean);
+        customCountEl.textContent = customStudents.length;
+    }
+
+    function clearSpinTimeouts() {
+        spinTimeouts.forEach(timeoutId => clearTimeout(timeoutId));
+        spinTimeouts = [];
+    }
+
+    function resetDisplay({ hide = false } = {}) {
+        clearSpinTimeouts();
+        slotEl.classList.remove("spinning", "winner");
+        slotDisplayEl.classList.remove("winner", "no-data");
+        slotDisplayEl.classList.toggle("empty", hide);
+        slotDisplayEl.textContent = hide ? "" : "Ready to spin!";
+        isSpinning = false;
+        spinBtn.disabled = false;
+    }
+
+    function toggleMode() {
+        if (isSpinning) return;
+
+        currentMode = currentMode === mode.PREDEFINED ? mode.CUSTOM : mode.PREDEFINED;
+        const usingCustom = currentMode === mode.CUSTOM;
+
+        classPanelEl.classList.toggle("textarea-hidden", usingCustom);
+        customPanelEl.classList.toggle("textarea-hidden", !usingCustom);
+
+        if (!usingCustom) {
+            collapseCustomTextarea();
+        }
+
+        modeToggleBtn.textContent = usingCustom ? "Switch to Class Lists" : "Switch to Custom List";
+
+        updateCounts();
+        resetDisplay({ hide: true });
+    }
+
+    function expandCustomTextarea() {
+        customWrapper.classList.add("expanded");
+    }
+
+    function collapseCustomTextarea() {
+        customWrapper.classList.remove("expanded");
+    }
+
+    function easeOutCubic(t) {
+        return 1 - Math.pow(1 - t, 3);
+    }
+
+    function updateSelectBackgroundColor() {
+        const gradients = [
+            'linear-gradient(90deg, rgba(20, 80, 20, 0.95), rgba(80, 200, 80, 0.85), rgba(20, 80, 20, 0.95))',      // Dark green
+            'linear-gradient(90deg, rgba(20, 20, 60, 0.95), rgba(80, 80, 180, 0.85), rgba(20, 20, 60, 0.95))',      // Dark blue
+            'linear-gradient(90deg, rgba(80, 10, 10, 0.95), rgba(200, 50, 50, 0.85), rgba(80, 10, 10, 0.95))',      // Dark red
+            'linear-gradient(90deg, rgba(10, 60, 60, 0.95), rgba(50, 160, 160, 0.85), rgba(10, 60, 60, 0.95))',     // Dark teal
+            'linear-gradient(90deg, rgba(40, 40, 40, 0.95), rgba(120, 120, 120, 0.85), rgba(40, 40, 40, 0.95))'     // Dark gray
+        ];
+        const selectedIndex = classSelectEl.selectedIndex;
+        const colorIndex = selectedIndex % gradients.length;
+        classSelectEl.style.background = gradients[colorIndex];
+        classSelectEl.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)';
+    }
+	
+	function createConfetti() {
+		const colors = ['#d4af37', '#f6d97a', '#9bff7a', '#66ffb2', '#8029d6', '#008ba7', '#f76f68', '#ff7033'];
+		const shapes = ['square', 'rectangle', 'circle'];
+		const confettiCount = 700;
+		
+		for (let i = 0; i < confettiCount; i++) {
+			const confetti = document.createElement('div');
+			confetti.className = 'confetti';
+			
+			// Start from random position above the screen
+			const startX = 50 + (Math.random() - 0.5) * 80;
+			confetti.style.left = startX + 'vw';
+			confetti.style.top = '-30vh';
+			
+			// Random color
+			confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+			
+			// Random shape
+			const shape = shapes[Math.floor(Math.random() * shapes.length)];
+			if (shape === 'circle') {
+				confetti.style.borderRadius = '50%';
+			} else if (shape === 'rectangle') {
+				confetti.style.width = '4px';
+				confetti.style.height = '8px';
+			}
+			
+			// Initial explosion velocity (shooting down and spreading)
+			const spreadX = (Math.random() - 0.5) * 800; // Horizontal spread
+			const explodeY = 250 + Math.random() * 600; // Initial downward velocity
+			
+			// Physics-based fall
+			const fallDuration = 2 + Math.random() * 12;
+			const delay = Math.random() * 0.5;
+			
+			confetti.style.setProperty('--spread-x', spreadX + 'px');
+			confetti.style.setProperty('--spread-y', explodeY + 'px');
+			
+			confetti.style.animation = `
+				confetti-explode ${fallDuration}s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}s forwards
+			`;
+			
+			document.body.appendChild(confetti);
+			
+			setTimeout(() => confetti.remove(), (fallDuration + delay + 0.5) * 1000);
+		}
+	}
+
+
+    function spin() {
+        if (isSpinning) return;
+
+        const students = getActiveList();
+        if (!students.length) {
+            resetDisplay({ hide: false });
+            slotDisplayEl.textContent = "No students available!";
+            slotDisplayEl.classList.add("no-data");
+            return;
+        }
+
+        collapseCustomTextarea();
+        clearSpinTimeouts();
+
+		isSpinning = true;
+		spinBtn.disabled = true;
+		spinBtn.classList.add("spinning");
+		spinBtn.innerHTML = `
+			<svg viewBox="0 0 24 24" fill="none">
+				<circle cx="12" cy="12" r="8" stroke="#020202" stroke-width="2" fill="none" stroke-dasharray="50.27" stroke-dashoffset="12.57"/>
+			</svg>
+			Spinning...
+		`;
+
+        slotDisplayEl.classList.remove("winner", "no-data", "empty");
+        slotEl.classList.remove("winner");
+        slotEl.classList.add("spinning");
+
+        const historyEntry = getHistoryEntry(students);
+        let finalCandidates = students;
+
+        if (historyEntry) {
+            let available = students.filter(student => !historyEntry.set.has(student));
+            if (!available.length) {
+                historyEntry.queue = [];
+                historyEntry.set.clear();
+                available = students.slice();
+            }
+            finalCandidates = available;
+        }
+
+        const totalDuration = 1000;
+        const steps = 36;
+        const startInterval = 20;
+        const endInterval = 320;
+
+        const intervals = [];
+        let sumIntervals = 0;
+
+        for (let i = 0; i < steps; i++) {
+            const progress = i / (steps - 1);
+            const interval = startInterval + (endInterval - startInterval) * easeOutCubic(progress);
+            intervals.push(interval);
+            sumIntervals += interval;
+        }
+
+        const scale = totalDuration / sumIntervals;
+        let cumulative = 0;
+        const finalStudent = finalCandidates[Math.floor(Math.random() * finalCandidates.length)];
+
+        for (let i = 0; i < steps; i++) {
+            cumulative += intervals[i] * scale;
+            const isLast = i === steps - 1;
+
+            const timeoutId = setTimeout(() => {
+                if (isLast) {
+                    slotDisplayEl.textContent = finalStudent;
+                    slotEl.classList.remove("spinning");
+                    slotEl.classList.add("winner");
+                    slotDisplayEl.classList.add("winner");
+					createConfetti();
+                    recordSelection(historyEntry, finalStudent);
+					isSpinning = false;
+					spinBtn.disabled = false;
+					spinBtn.classList.remove("spinning");
+					spinBtn.innerHTML = `
+						<svg viewBox="0 0 24 24" fill="none">
+							<circle cx="12" cy="12" r="8" stroke="#020202" stroke-width="2" fill="none" stroke-dasharray="50.27" stroke-dashoffset="12.57"/>
+						</svg>
+						Spin
+					`;
+                } else {
+                    const randomStudent = students[Math.floor(Math.random() * students.length)];
+                    slotDisplayEl.textContent = randomStudent;
+                }
+            }, cumulative);
+
+            spinTimeouts.push(timeoutId);
+        }
+    }
+
+    modeToggleBtn.addEventListener("click", toggleMode);
+
+    classSelectEl.addEventListener("change", () => {
+        if (isSpinning) return;
+        updateSelectBackgroundColor();
+        resetDisplay({ hide: true });
+    });
+
+    customCountBtn.addEventListener("click", () => {
+        if (isSpinning) return;
+        customWrapper.classList.toggle("expanded");
+    });
+
+    customListEl.addEventListener("input", () => {
+        if (isSpinning) return;
+        updateCounts();
+        resetDisplay({ hide: true });
+    });
+
+    spinBtn.addEventListener("click", spin);
+    slotEl.addEventListener("click", spin);
+
+    function updateFooterTime() {
+        const now = new Date();
+        const day = now.getDate();
+        const month = now.toLocaleString('en-US', { month: 'long' });
+        const year = now.getFullYear();
+        const dayOfWeek = now.toLocaleString('en-US', { weekday: 'long' });
+
+        let hours = now.getHours();
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+
+        const dateTimeString = `${day} ${month} ${year} (${dayOfWeek}), ${hours}:${minutes}:${seconds} ${ampm}`;
+        document.getElementById('footerTime').innerHTML = `<span>🕐</span><span>${dateTimeString}</span>`;
+    }
+
+    // Update time immediately and then every second
+    updateFooterTime();
+    setInterval(updateFooterTime, 1000);
+
+    // Set current year in footer
+    document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+    populateClassSelect();
+    updateCounts();
+    updateSelectBackgroundColor();
+</script>
+</body>
+</html>
