@@ -407,13 +407,49 @@
 
     @media (max-width: 580px) {
         .app {
-            padding: 28px 20px 32px;
+            padding: 20px 16px 32px;
+        }
+
+        .top-controls {
+            position: static;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 20px;
+            padding: 12px 0;
+        }
+
+        .mode-toggle {
+            flex: 0 0 auto;
+            width: auto;
+            min-width: 120px;
+            text-align: center;
+            white-space: nowrap;
+            font-size: 0.85rem;
+            padding: 10px 12px;
+            margin-right: 12px;
+        }
+
+        .timer-toggle {
+            width: 48px;
+            height: 48px;
+            font-size: 1.1rem;
+            flex-shrink: 0;
         }
 
         header {
             flex-direction: column;
             align-items: flex-start;
-            gap: 16px;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin: 0;
+            text-align: center;
+            width: 100%;
         }
 
         .spin-btn {
@@ -426,18 +462,51 @@
 
         .footer {
             flex-direction: column;
-            gap: 12px;
+            gap: 8px;
             text-align: center;
             padding: 12px 16px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .app {
+            padding: 16px 12px 28px;
+        }
+
+        h1 {
+            font-size: 1.6rem;
+        }
+
+        .top-controls {
+            margin-bottom: 16px;
+            padding: 8px 0;
+        }
+
+        .mode-toggle {
+            font-size: 0.8rem;
+            padding: 8px 10px;
+            min-width: 100px;
+        }
+    }
+
+    @media (max-width: 360px) {
+        .mode-toggle {
+            font-size: 0.75rem;
+            padding: 6px 8px;
+            min-width: 90px;
+        }
+
+        h1 {
+            font-size: 1.4rem;
         }
     }
 	
 	.confetti {
 		position: fixed;
-		width: 4px;
-		height: 4px;
+		width: 3px;
+		height: 6px;
 		pointer-events: none;
-		z-index: 9999;
+		z-index: 10001;
 		opacity: 1;
 	}
 
@@ -452,14 +521,540 @@
 		}
 	}
 
+	/* Timer Module Styles */
+	.top-controls {
+		position: absolute;
+		top: 40px;
+		right: 32px;
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		z-index: 10;
+	}
+
+	.timer-toggle {
+		background: rgba(212, 175, 55, 0.15);
+		border: 1px solid rgba(212, 175, 55, 0.35);
+		color: var(--accent-gold);
+		padding: 10px;
+		border-radius: 50%;
+		cursor: pointer;
+		font-size: 1.1rem;
+		line-height: 1;
+		transition: all 0.2s ease;
+		width: 44px;
+		height: 44px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		box-sizing: border-box;
+	}
+
+	.timer-toggle.student-selector {
+		color: #cc0000;
+	}
+
+	.fullscreen-toggle {
+		background: rgba(100, 149, 237, 0.15);
+		border: 1px solid rgba(100, 149, 237, 0.35);
+		color: #6495ed;
+		padding: 10px;
+		border-radius: 50%;
+		cursor: pointer;
+		font-size: 1.1rem;
+		line-height: 1;
+		transition: all 0.2s ease;
+		width: 44px;
+		height: 44px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		box-sizing: border-box;
+	}
+
+	.timer-toggle:hover {
+		background: rgba(212, 175, 55, 0.25);
+		transform: scale(1.05);
+	}
+
+	.timer-toggle.student-selector:hover {
+		background: rgba(212, 175, 55, 0.25);
+		transform: scale(1.05);
+	}
+
+	.fullscreen-toggle:hover {
+		background: rgba(100, 149, 237, 0.25);
+		transform: scale(1.05);
+	}
+
+	.timer-module {
+		background: linear-gradient(145deg, #2a2a2a, #0a0a0a);
+		border: 1px solid rgba(212, 175, 55, 0.18);
+		border-radius: 24px;
+		padding: 32px;
+		margin-bottom: 24px;
+		position: relative;
+		overflow: hidden;
+		box-shadow: var(--shadow);
+	}
+
+	.timer-module.hidden {
+		display: none;
+	}
+
+	.timer-container {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 24px;
+		position: relative;
+	}
+
+	.timer-ring-container {
+		position: relative;
+		width: 300px;
+		height: 300px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.timer-ring {
+		position: absolute;
+		top: 0;
+		left: 0;
+	}
+
+	.timer-progress {
+		transition: stroke-dashoffset 0.3s ease, stroke 0.3s ease;
+		transform-origin: center;
+	}
+
+	.timer-display {
+		position: relative;
+		z-index: 2;
+		font-size: 5rem;
+		font-weight: 900;
+		font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+		color: var(--accent-gold);
+		cursor: pointer;
+		user-select: none;
+		letter-spacing: 0.02em;
+		transition: color 0.3s ease, transform 0.2s ease;
+	}
+
+	.timer-display:not(.warning):not(.danger) {
+		color: var(--text-light);
+	}
+
+	.timer-display:not(.warning):not(.danger):not(.editing) {
+		color: white;
+	}
+
+	.timer-display:hover {
+		transform: scale(1.02);
+	}
+
+	.timer-display.editing {
+		outline: 2px solid var(--accent-gold);
+		outline-offset: 4px;
+	}
+
+	.timer-display.warning {
+		color: #ffaa00;
+	}
+
+	.timer-display.danger {
+		color: #ff4444;
+		font-weight: 900;
+		animation: timerPulse 1s ease-in-out infinite;
+	}
+
+	@keyframes timerPulse {
+		0%, 100% { transform: scale(1); }
+		50% { transform: scale(1.05); }
+	}
+
+	.timer-controls {
+		display: flex;
+		gap: 20px;
+		align-items: center;
+	}
+
+	.timer-btn {
+		width: 64px;
+		height: 64px;
+		border-radius: 50%;
+		border: none;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.2s ease;
+		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+	}
+
+	.timer-btn svg {
+		width: 28px;
+		height: 28px;
+	}
+
+	.timer-btn-play {
+		background: linear-gradient(135deg, #4ade80, #22c55e);
+		color: white;
+	}
+
+	.timer-btn-play:hover {
+		transform: scale(1.05);
+		box-shadow: 0 12px 32px rgba(74, 222, 128, 0.4);
+	}
+
+	.timer-btn-pause {
+		background: linear-gradient(135deg, #fbbf24, #f59e0b);
+		color: white;
+	}
+
+	.timer-btn-pause:hover {
+		transform: scale(1.05);
+		box-shadow: 0 12px 32px rgba(251, 191, 36, 0.4);
+	}
+
+	.timer-btn-reset {
+		background: rgba(212, 175, 55, 0.15);
+		border: 1px solid rgba(212, 175, 55, 0.35);
+		color: var(--accent-gold);
+	}
+
+	.timer-btn-reset:hover {
+		background: rgba(212, 175, 55, 0.25);
+		transform: scale(1.05);
+	}
+
+	.timer-adjustments {
+		display: flex;
+		gap: 16px;
+	}
+
+	.timer-adjust-btn {
+		background: rgba(212, 175, 55, 0.1);
+		border: 1px solid rgba(212, 175, 55, 0.25);
+		color: var(--accent-gold);
+		padding: 10px 16px;
+		border-radius: 12px;
+		cursor: pointer;
+		font-size: 0.9rem;
+		font-weight: 600;
+		transition: all 0.2s ease;
+	}
+
+	.timer-adjust-btn:hover {
+		background: rgba(212, 175, 55, 0.2);
+		transform: translateY(-1px);
+	}
+
+	.timer-adjustments.hidden {
+		display: none;
+	}
+
+	.fullscreen-btn {
+		position: absolute;
+		top: 16px;
+		right: 16px;
+		background: rgba(212, 175, 55, 0.1);
+		border: 1px solid rgba(212, 175, 55, 0.25);
+		color: var(--accent-gold);
+		padding: 8px;
+		border-radius: 8px;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+	.fullscreen-btn:hover {
+		background: rgba(212, 175, 55, 0.2);
+	}
+
+	.fullscreen-btn svg {
+		width: 20px;
+		height: 20px;
+	}
+
+	/* Fullscreen styles */
+	.timer-module.fullscreen {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		border-radius: 0;
+		z-index: 10000;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin: 0;
+	}
+
+	.timer-module.fullscreen .timer-container {
+		transform: scale(1.2);
+	}
+
+	.timer-module.fullscreen .timer-ring-container {
+		width: 400px;
+		height: 400px;
+	}
+
+	.timer-module.fullscreen .timer-ring {
+		width: 400px;
+		height: 400px;
+		viewBox: "0 0 300 300";
+	}
+
+	.timer-module.fullscreen .timer-ring circle {
+		stroke-width: 20px !important;
+	}
+
+	.timer-module.fullscreen .timer-progress {
+		stroke-width: 20px !important;
+	}
+
+	.timer-module.fullscreen .timer-display {
+		font-size: 6rem;
+	}
+
+	.timer-module.fullscreen .timer-btn {
+		width: 80px;
+		height: 80px;
+	}
+
+	.timer-module.fullscreen .timer-btn svg {
+		width: 36px;
+		height: 36px;
+	}
+
+	/* Student Selector Fullscreen Container */
+	.student-selector-container {
+		position: relative;
+	}
+
+	.student-selector-container.fullscreen {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: var(--bg-dark);
+		z-index: 10000;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		padding: 40px;
+	}
+
+	.student-selector-container.fullscreen .slot {
+		width: 90vw;
+		max-width: 800px;
+		min-height: 200px;
+		height: auto;
+		font-size: 4rem;
+		margin: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.student-selector-container.fullscreen .slot-display {
+		font-size: 4rem;
+		line-height: 1.2;
+		word-wrap: break-word;
+		hyphens: auto;
+		text-align: center;
+		padding: 20px;
+	}
+
+	.student-selector-container.fullscreen .controls {
+		margin-top: 60px;
+		gap: 40px;
+	}
+
+	.student-selector-container.fullscreen .randomize-btn {
+		width: 200px;
+		height: 200px;
+		font-size: 2.5rem;
+		border-radius: 50%;
+	}
+
+	.student-selector-container.fullscreen .stop-btn {
+		width: 120px;
+		height: 120px;
+		font-size: 1.5rem;
+		border-radius: 50%;
+	}
+
+	/* Mobile responsive adjustments for fullscreen */
+	@media (max-width: 768px) {
+		.student-selector-container.fullscreen .slot {
+			width: 95vw;
+			padding: 30px;
+		}
+
+		.student-selector-container.fullscreen .slot-display {
+			font-size: 3rem;
+			line-height: 1.3;
+			padding: 15px;
+		}
+
+		.student-selector-container.fullscreen .controls {
+			margin-top: 40px;
+			gap: 30px;
+		}
+
+		.student-selector-container.fullscreen .randomize-btn {
+			width: 160px;
+			height: 160px;
+			font-size: 2rem;
+		}
+
+		.student-selector-container.fullscreen .stop-btn {
+			width: 100px;
+			height: 100px;
+			font-size: 1.2rem;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.student-selector-container.fullscreen .slot-display {
+			font-size: 2.5rem;
+			line-height: 1.4;
+		}
+
+		.student-selector-container.fullscreen .controls {
+			margin-top: 30px;
+			gap: 20px;
+		}
+
+		.student-selector-container.fullscreen .randomize-btn {
+			width: 140px;
+			height: 140px;
+			font-size: 1.8rem;
+		}
+
+		.student-selector-container.fullscreen .stop-btn {
+			width: 80px;
+			height: 80px;
+			font-size: 1rem;
+		}
+	}
+
+	/* Hide fullscreen button when in fullscreen mode */
+	.student-selector-container.fullscreen .fullscreen-toggle {
+		display: none;
+	}
+
+	/* Time's Up Popup */
+	.times-up-popup {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: rgba(0, 0, 0, 0.8);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 10001;
+		backdrop-filter: blur(5px);
+	}
+
+	.times-up-popup.hidden {
+		display: none;
+	}
+
+	.times-up-content {
+		background: linear-gradient(145deg, #2a2a2a, #0a0a0a);
+		border: 2px solid rgba(255, 68, 68, 0.6);
+		border-radius: 24px;
+		padding: 40px;
+		text-align: center;
+		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+		max-width: 400px;
+		animation: timesUpPopupBounce 0.6s ease-out;
+	}
+
+	.times-up-content {
+		cursor: pointer;
+		transition: all 0.2s ease;
+		z-index: 10002;
+		position: relative;
+	}
+
+	.times-up-content:hover {
+		transform: scale(1.02);
+	}
+
+	.times-up-clock {
+		font-size: 6rem;
+		line-height: 1;
+		margin-bottom: 20px;
+		animation: clockPulse 1s ease-in-out infinite;
+	}
+
+	.times-up-title {
+		font-size: 2.5rem;
+		font-weight: 900;
+		color: #ff4444;
+		margin-bottom: 16px;
+		text-shadow: 0 0 20px rgba(255, 68, 68, 0.8);
+	}
+
+	.times-up-close {
+		background: rgba(255, 255, 255, 0.1);
+		border: 1px solid rgba(255, 255, 255, 0.2);
+		color: rgba(255, 255, 255, 0.8);
+		padding: 8px 16px;
+		border-radius: 8px;
+		font-size: 0.9rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+	.times-up-close:hover {
+		background: rgba(255, 255, 255, 0.2);
+		color: white;
+	}
+
+	@keyframes clockPulse {
+		0%, 100% {
+			transform: scale(1);
+			filter: drop-shadow(0 0 10px rgba(255, 68, 68, 0.6));
+		}
+		50% {
+			transform: scale(1.1);
+			filter: drop-shadow(0 0 25px rgba(255, 68, 68, 0.9));
+		}
+	}
+
+	@keyframes timesUpPopupBounce {
+		0% { transform: scale(0.3) rotate(-5deg); opacity: 0; }
+		50% { transform: scale(1.05) rotate(2deg); }
+		70% { transform: scale(0.95) rotate(-1deg); }
+		100% { transform: scale(1) rotate(0deg); opacity: 1; }
+	}
+
 </style>
 </head>
 <body>
 <div class="app">
     <header>
         <h1>Select Student</h1>
-        <button class="mode-toggle" id="modeToggleBtn" type="button">Switch to Custom List</button>
     </header>
+
+    <!-- Top-right control buttons -->
+    <div class="top-controls">
+        <button class="mode-toggle" id="modeToggleBtn" type="button">Switch to Custom List</button>
+        <button class="timer-toggle student-selector" id="timerToggleBtn" type="button" title="Timer">🕰️</button>
+        <button class="fullscreen-toggle" id="fullscreenToggleBtn" type="button" title="Fullscreen">⛶</button>
+    </div>
 
     <section class="panel" id="classPanel">
         <select id="classSelect"></select>
@@ -474,19 +1069,117 @@
         </div>
     </section>
 
-    <section class="slot" id="slot" title="Click to spin">
-        <div class="slot-display" id="slotDisplay">Ready to spin!</div>
+    <div class="student-selector-container" id="studentSelectorContainer">
+        <section class="slot" id="slot" title="Click to spin">
+            <div class="slot-display" id="slotDisplay">Ready to spin!</div>
+        </section>
+
+        <div class="controls">
+            <button class="spin-btn" id="spinBtn" type="button">
+                <svg viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="8" stroke="#020202" stroke-width="2" fill="none" stroke-dasharray="50.27" stroke-dashoffset="12.57"/>
+                </svg>
+                Spin
+            </button>
+        </div>
+    </div>
+
+    <!-- Time's Up Popup -->
+    <div class="times-up-popup hidden" id="timesUpPopup">
+        <div class="times-up-content">
+            <div class="times-up-clock">⏰</div>
+            <div class="times-up-title">Time's Up!</div>
+            <div class="times-up-close" id="timesUpClose">Tap anywhere to close</div>
+        </div>
+    </div>
+
+    <!-- Timer Module -->
+    <section class="timer-module hidden" id="timerModule">
+        <div class="timer-container">
+            <div class="timer-ring-container">
+                <svg class="timer-ring" width="300" height="300" viewBox="0 0 300 300">
+                    <defs>
+                        <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#d4af37;stop-opacity:1">
+                                <animate attributeName="stop-color" values="#d4af37;#ff7033;#d4af37" dur="3s" repeatCount="indefinite"/>
+                            </stop>
+                            <stop offset="100%" style="stop-color:#ff7033;stop-opacity:1">
+                                <animate attributeName="stop-color" values="#ff7033;#d4af37;#ff7033" dur="3s" repeatCount="indefinite"/>
+                            </stop>
+                        </linearGradient>
+                        <linearGradient id="orangeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#ff7033;stop-opacity:1">
+                                <animate attributeName="stop-color" values="#ff7033;#ffaa00;#ff7033" dur="2s" repeatCount="indefinite"/>
+                            </stop>
+                            <stop offset="100%" style="stop-color:#ffaa00;stop-opacity:1">
+                                <animate attributeName="stop-color" values="#ffaa00;#ff7033;#ffaa00" dur="2s" repeatCount="indefinite"/>
+                            </stop>
+                        </linearGradient>
+                        <linearGradient id="redGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#ff4444;stop-opacity:1">
+                                <animate attributeName="stop-color" values="#ff4444;#cc0000;#ff4444" dur="1s" repeatCount="indefinite"/>
+                            </stop>
+                            <stop offset="100%" style="stop-color:#cc0000;stop-opacity:1">
+                                <animate attributeName="stop-color" values="#cc0000;#ff4444;#cc0000" dur="1s" repeatCount="indefinite"/>
+                            </stop>
+                        </linearGradient>
+                        <filter id="glow">
+                            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                            <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+                    <!-- Background circle -->
+                    <circle cx="150" cy="150" r="135" stroke="#1a1a1a" stroke-width="16" fill="none"/>
+                    <!-- Animated rotating ring -->
+                    <circle class="timer-progress" cx="150" cy="150" r="135"
+                            stroke="url(#goldGradient)"
+                            stroke-width="16"
+                            fill="none"
+                            stroke-dasharray="848.23"
+                            stroke-dashoffset="0"
+                            stroke-linecap="round"
+                            filter="url(#glow)"
+                            style="transform-origin: center; transform: rotate(-90deg);">
+                        <animateTransform attributeName="transform"
+                                        type="rotate"
+                                        from="-90 150 150"
+                                        to="630 150 150"
+                                        dur="20s"
+                                        repeatCount="indefinite"/>
+                    </circle>
+                </svg>
+                <div class="timer-display" id="timerDisplay">05:00</div>
+            </div>
+            <div class="timer-controls">
+                <button class="timer-btn timer-btn-play" id="timerPlayBtn" type="button">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                </button>
+                <button class="timer-btn timer-btn-reset" id="timerResetBtn" type="button">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 12a9 9 0 1 1 9 9 9 9 0 0 1-6-2.3L3 16M3 3v6h6"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="timer-adjustments" id="timerAdjustments">
+                <button class="timer-adjust-btn" data-action="remove-30" type="button">−30 sec</button>
+                <button class="timer-adjust-btn" data-action="remove" type="button">−1 min</button>
+                <button class="timer-adjust-btn" data-action="add" type="button">+1 min</button>
+                <button class="timer-adjust-btn" data-action="add-30" type="button">+30 sec</button>
+            </div>
+        </div>
+        <button class="fullscreen-btn" id="fullscreenBtn" type="button" title="Fullscreen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+            </svg>
+        </button>
     </section>
 
-    <div class="controls">
-        <button class="spin-btn" id="spinBtn" type="button">
-			<svg viewBox="0 0 24 24" fill="none">
-				<circle cx="12" cy="12" r="8" stroke="#020202" stroke-width="2" fill="none" stroke-dasharray="50.27" stroke-dashoffset="12.57"/>
-			</svg>
-            Spin
-        </button>
     </div>
-</div>
 
 <footer class="footer">
     <div class="footer-name">© <span id="currentYear"></span> Anderson Serangoon Junior College</div>
@@ -494,129 +1187,105 @@
 </footer>
 
 <script>
+	// =====================================================================
+	// CLASS DATA CONFIGURATION
+	// =====================================================================
+	// To add/edit your classes, modify the classData array below.
+	//
+	// STRUCTURE:
+	// Each class object has:
+	// - "id": unique identifier (use numbers/letters, no spaces)
+	// - "name": display name that appears in the dropdown
+	// - "students": array of student names (one name per line)
+	//
+	// EXAMPLE:
+	// {
+	//		"id": "math-101",
+	//		"name": "Math Class 101",
+	//		"students": [
+	//			"John Doe",
+	//			"Jane Smith",
+	//			"Bob Johnson"
+	//		]
+	// },
+	//
+	// INSTRUCTIONS:
+	// 1. Replace the existing classes below with your own
+	// 2. Add more class objects by copying the pattern
+	// 3. Make sure each "id" is unique
+	// 4. Student names should be in quotes and separated by commas
+	// 5. The last student name should NOT have a comma after it
+	// 6. Keep the array format: [ {class1}, {class2}, {class3} ]
+	// =====================================================================
+
 	const classData = [
 		{
-			"id": "class-a",
-			"name": "Class A",
+			"id": "class-1",
+			"name": "Class 1",
 			"students": [
-				"Malcolm Tan",
-				"Andrew Tay",
-				"Rachel Lim",
-				"Brandon Ng",
-				"Melissa Wong",
-				"Darren Chua",
-				"Jasmine Teo",
-				"Kenneth Loh",
-				"Vanessa Ong",
-				"Marcus Yeo",
+				"Edwin Chong",
+				"Alex Tan",
+				"Sarah Lim",
+				"Michael Wong",
+				"Jessica Ng",
+				"Daniel Koh"
+			]
+		},
+		{
+			"id": "class-2",
+			"name": "Class 2",
+			"students": [
+				"Benjamin Lee",
+				"Rachel Goh",
+				"Samuel Tan",
+				"Olivia Chen",
+				"Ethan Wong",
+				"Emily Lim",
+				"Matthew Koh",
+				"Sophia Ng",
+				"Ryan Chua",
+				"Charlotte Lee"
+			]
+		},
+		{
+			"id": "class-3",
+			"name": "Class 3",
+			"students": [
+				"David Tan",
+				"Grace Wong",
+				"James Lim",
+				"Michelle Chen",
+				"Christopher Ng",
 				"Nicole Goh",
-				"Ethan Toh",
-				"Sophie Lee",
-				"Adrian Koh",
-				"Priya Pillai",
-				"Jordan Tan",
-				"Samantha Lim",
-				"Isaac Quah",
-				"Fiona Chia",
-				"Nathan Seah",
-				"Chloe Poh",
-				"Ryan Chew",
-				"Gabrielle Soh",
-				"Devon Ooi",
-				"Amelia Wee"
+				"Jonathan Lee",
+				"Isabelle Koh",
+				"Aaron Chua",
+				"Rebecca Tan",
+				"Zachary Lim",
+				"Hannah Wong",
+				"Joshua Chen",
+				"Amanda Ng",
+				"Benjamin Goh",
+				"Oliver Lee",
+				"Sophie Koh",
+				"Lucas Chua",
+				"Emma Tan",
+				"William Lim",
+				"Alexander Wong"
 			]
 		},
 		{
-			"id": "class-b",
-			"name": "Class B",
+			"id": "class-4",
+			"name": "Class 4",
 			"students": [
-				"Timothy Neo",
-				"Hannah Soo",
-				"Garrett Sim",
-				"Stephanie Lim",
-				"Benjamin Chong",
-				"Kirsten Ang",
-				"Derek Peh",
-				"Jessica Loo",
-				"Gregory Tay",
-				"Amber Kwan",
-				"Jason Loh",
-				"Natalie Ong",
-				"Christopher Chia",
-				"Tanya Quah",
-				"Mitchell Chew",
-				"Victoria Leong",
-				"Zachary Goh",
-				"Isabella Chan",
-				"Aaron Toh",
-				"Kaylee Soh",
-				"Evan Yeo",
-				"Rosie Tan",
-				"Steven Koh",
-				"Sophia Wee",
-				"Kyle Ng"
-			]
-		},
-		{
-			"id": "class-c",
-			"name": "Class C",
-			"students": [
-				"Marcus Ooi",
-				"Vanessa Lua",
-				"Richard Poh",
-				"Priscilla Teo",
-				"Patrick Lim",
-				"Daniela Goh",
-				"Vincent Chiah",
-				"Cheryl Tan",
-				"Sean Kwan",
-				"Linda Yim",
-				"Gary Tah",
-				"Joanne Sng",
-				"Bryan Ong",
-				"Cassandra Koh",
-				"Dominic Seah",
-				"Felicia Loo",
-				"Felix Sim",
-				"Gloria Chia",
-				"Harvey Ong",
-				"Iris Lye",
-				"Ivan Tan",
-				"Jade Tay",
-				"Justin Lim",
-				"Karen Ng",
-				"Lance Toh"
-			]
-		},
-		{
-			"id": "class-d",
-			"name": "Class D",
-			"students": [
-				"Leonard Yong",
-				"Melissa Toh",
-				"Maurice Chua",
-				"Natasha Lim",
-				"Nelson Tay",
-				"Olivia Koh",
-				"Oscar Ang",
-				"Patricia Loh",
-				"Paul Chow",
-				"Quincy Soh",
-				"Randall Tan",
-				"Rebecca Neo",
-				"Roland Chia",
-				"Sheryl Poh",
-				"Stanley Lim",
-				"Tiffany Ooi",
-				"Toby Teo",
-				"Ursula Chong",
-				"Vernon Goh",
-				"Whitney Wee",
-				"Xavier Ng",
-				"Yuki Sim",
-				"Zachary Ong",
-				"Aimee Kwan",
-				"Bradley Toh"
+				"Ryan Lee",
+				"Michelle Tan",
+				"Daniel Wong",
+				"Chloe Lim",
+				"Jason Chen",
+				"Rachel Ng",
+				"Samuel Goh",
+				"Tiffany Lee"
 			]
 		}
 	];
@@ -775,50 +1444,101 @@
         classSelectEl.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)';
     }
 	
-	function createConfetti() {
-		const colors = ['#d4af37', '#f6d97a', '#9bff7a', '#66ffb2', '#8029d6', '#008ba7', '#f76f68', '#ff7033'];
-		const shapes = ['square', 'rectangle', 'circle'];
-		const confettiCount = 700;
-		
-		for (let i = 0; i < confettiCount; i++) {
-			const confetti = document.createElement('div');
-			confetti.className = 'confetti';
-			
-			// Start from random position above the screen
-			const startX = 50 + (Math.random() - 0.5) * 80;
-			confetti.style.left = startX + 'vw';
-			confetti.style.top = '-30vh';
-			
-			// Random color
-			confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-			
-			// Random shape
-			const shape = shapes[Math.floor(Math.random() * shapes.length)];
-			if (shape === 'circle') {
-				confetti.style.borderRadius = '50%';
-			} else if (shape === 'rectangle') {
-				confetti.style.width = '4px';
-				confetti.style.height = '8px';
+	// Unified confetti function - handles both single burst and continuous modes
+	function createConfetti(options = {}) {
+		const {
+			mode = 'single', // 'single' or 'continuous'
+			duration = mode === 'continuous' ? 10000 : 0,
+			confettiCount = mode === 'single' ? 700 : 0,
+			burstSize = mode === 'continuous' ? 35 : 0,
+			interval = mode === 'continuous' ? 300 : 0
+		} = options;
+
+		const colors = [
+			'#d4af37', '#f6d97a', '#9bff7a', '#66ffb2', '#8029d6', '#008ba7', '#f76f68', '#ff7033',
+			'#ff69b4', '#ff1493', '#ffd700', '#40e0d0', '#98fb98', '#dda0dd', '#f0e68c',
+			'#87ceeb', '#ffc0cb', '#b0e0e6', '#ffdab9', '#e6e6fa', '#f5deb3', '#ff8c00',
+			'#4169e1', '#dc143c', '#00ff7f', '#ff6347', '#4682b4', '#daa520', '#ee82ee'
+		];
+
+		const createSingleBurst = (count) => {
+			for (let i = 0; i < count; i++) {
+				const confetti = document.createElement('div');
+				confetti.className = 'confetti';
+
+				// Start from random position above the screen
+				const startX = 50 + (Math.random() - 0.5) * 80;
+				confetti.style.left = startX + 'vw';
+				confetti.style.top = mode === 'single' ? '-30vh' : '-20vh';
+
+				// Random color from expanded palette
+				confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+
+				// Random rotation for variety
+				confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+
+				// Random slight size variation
+				const widthVariation = 2 + Math.random() * 3; // 2-5px width
+				const heightVariation = 4 + Math.random() * 6; // 4-10px height
+				confetti.style.width = widthVariation + 'px';
+				confetti.style.height = heightVariation + 'px';
+
+				// Initial explosion velocity
+				const spreadX = (Math.random() - 0.5) * (mode === 'single' ? 800 : 600);
+				const explodeY = (mode === 'single' ? 250 : 150) + Math.random() * (mode === 'single' ? 600 : 400);
+
+				// Physics-based fall
+				const fallDuration = (mode === 'single' ? 2 : 3) + Math.random() * (mode === 'single' ? 12 : 8);
+
+				confetti.style.setProperty('--spread-x', spreadX + 'px');
+				confetti.style.setProperty('--spread-y', explodeY + 'px');
+
+				const delay = mode === 'single' ? Math.random() * 0.5 : 0;
+				confetti.style.animation = `
+					confetti-explode ${fallDuration}s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}s forwards
+				`;
+
+				document.body.appendChild(confetti);
+
+				const removalTime = mode === 'single'
+					? (fallDuration + Math.random() * 0.5 + 0.5) * 1000
+					: fallDuration * 1000 + 500;
+				setTimeout(() => confetti.remove(), removalTime);
 			}
-			
-			// Initial explosion velocity (shooting down and spreading)
-			const spreadX = (Math.random() - 0.5) * 800; // Horizontal spread
-			const explodeY = 250 + Math.random() * 600; // Initial downward velocity
-			
-			// Physics-based fall
-			const fallDuration = 2 + Math.random() * 12;
-			const delay = Math.random() * 0.5;
-			
-			confetti.style.setProperty('--spread-x', spreadX + 'px');
-			confetti.style.setProperty('--spread-y', explodeY + 'px');
-			
-			confetti.style.animation = `
-				confetti-explode ${fallDuration}s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}s forwards
-			`;
-			
-			document.body.appendChild(confetti);
-			
-			setTimeout(() => confetti.remove(), (fallDuration + delay + 0.5) * 1000);
+		};
+
+		if (mode === 'single') {
+			// Single burst for student selection
+			createSingleBurst(confettiCount);
+		} else {
+			// Continuous mode for timer (20 seconds)
+			const endTime = Date.now() + duration;
+
+			const createBurst = () => {
+				if (Date.now() >= endTime) return;
+				createSingleBurst(burstSize);
+			};
+
+			// Create initial burst
+			createBurst();
+
+			// Continue creating bursts
+			const intervalId = setInterval(() => {
+				if (Date.now() >= endTime) {
+					clearInterval(intervalId);
+					return;
+				}
+				createBurst();
+			}, interval);
+
+			// Random extra bursts for variety
+			const randomIntervalId = setInterval(() => {
+				if (Date.now() >= endTime) {
+					clearInterval(randomIntervalId);
+					return;
+				}
+				if (Math.random() > 0.6) createBurst();
+			}, 150);
 		}
 	}
 
@@ -893,7 +1613,7 @@
                     slotEl.classList.remove("spinning");
                     slotEl.classList.add("winner");
                     slotDisplayEl.classList.add("winner");
-					createConfetti();
+					createConfetti({ mode: 'single' });
                     recordSelection(historyEntry, finalStudent);
 					isSpinning = false;
 					spinBtn.disabled = false;
@@ -964,6 +1684,617 @@
     populateClassSelect();
     updateCounts();
     updateSelectBackgroundColor();
+
+    // Timer Module JavaScript
+    const timer = {
+        totalSeconds: 180, // 3 minutes default
+        currentSeconds: 180,
+        isRunning: false,
+        isPaused: false,
+        interval: null,
+
+        elements: {
+            module: document.getElementById('timerModule'),
+            toggle: document.getElementById('timerToggleBtn'),
+            display: document.getElementById('timerDisplay'),
+            playBtn: document.getElementById('timerPlayBtn'),
+            resetBtn: document.getElementById('timerResetBtn'),
+            progress: document.querySelector('.timer-progress'),
+            adjustments: document.getElementById('timerAdjustments'),
+            adjustBtns: document.querySelectorAll('.timer-adjust-btn'),
+            fullscreenBtn: document.getElementById('fullscreenBtn')
+        },
+
+        init() {
+            this.setupEventListeners();
+            this.updateDisplay();
+        },
+
+        setupEventListeners() {
+            this.elements.toggle.addEventListener('click', () => this.toggleTimerModule());
+            this.elements.display.addEventListener('click', () => this.startEditing());
+            this.elements.playBtn.addEventListener('click', () => this.togglePlayPause());
+            this.elements.resetBtn.addEventListener('click', () => this.reset());
+            this.elements.adjustBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => this.adjustTime(e.target.dataset.action));
+            });
+            this.elements.fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
+
+            // Handle keyboard input for time editing
+            document.addEventListener('keydown', (e) => {
+                if (this.elements.display.classList.contains('editing')) {
+                    this.handleKeyboardInput(e);
+                }
+            });
+
+            // Handle escape key to exit editing
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && this.elements.display.classList.contains('editing')) {
+                    this.stopEditing();
+                }
+            });
+        },
+
+        toggleTimerModule() {
+            const isHidden = this.elements.module.classList.contains('hidden');
+            const slotModule = document.getElementById('slot');
+            const spinControls = document.querySelector('.controls');
+            const classPanel = document.getElementById('classPanel');
+            const customPanel = document.getElementById('customPanel');
+            const modeToggleBtn = document.getElementById('modeToggleBtn');
+            const titleElement = document.querySelector('h1');
+
+            if (isHidden) {
+                // Hide all student selector elements, show timer
+                slotModule.style.display = 'none';
+                spinControls.style.display = 'none';
+                classPanel.style.display = 'none';
+                customPanel.style.display = 'none';
+                modeToggleBtn.style.display = 'none';
+                this.elements.module.classList.remove('hidden');
+                this.elements.toggle.style.background = 'rgba(212, 175, 55, 0.35)';
+
+                // Change title to TIMER in orange
+                titleElement.textContent = 'TIMER';
+                titleElement.style.color = '#ff7033';
+
+                // Change timer toggle icon to pointer for timer mode
+                this.elements.toggle.innerHTML = '👆';
+                this.elements.toggle.title = 'Back to Student Selector';
+                this.elements.toggle.classList.remove('student-selector');
+            } else {
+                // Show all student selector elements, hide timer
+                slotModule.style.display = 'block';
+                spinControls.style.display = 'flex';
+                // Reset inline display styles to allow CSS classes to work
+                classPanel.style.display = '';
+                customPanel.style.display = '';
+                const usingCustom = currentMode === mode.CUSTOM;
+                // Restore panel visibility based on current mode
+                if (usingCustom) {
+                    classPanelEl.classList.add("textarea-hidden");
+                    customPanelEl.classList.remove("textarea-hidden");
+                } else {
+                    classPanelEl.classList.remove("textarea-hidden");
+                    customPanelEl.classList.add("textarea-hidden");
+                }
+                modeToggleBtn.style.display = 'block';
+                this.elements.module.classList.add('hidden');
+                this.elements.toggle.style.background = 'rgba(212, 175, 55, 0.15)';
+
+                // Restore original title
+                titleElement.textContent = 'Select Student';
+                titleElement.style.color = 'var(--accent-gold)';
+
+                // Change timer toggle icon to red clock for student selector mode
+                this.elements.toggle.innerHTML = '🕰️';
+                this.elements.toggle.title = 'Timer';
+                this.elements.toggle.classList.add('student-selector');
+
+                if (this.isRunning) {
+                    this.pause();
+                }
+            }
+        },
+
+        startEditing() {
+            if (this.isRunning) return;
+            if (this.currentSeconds !== this.totalSeconds) return; // Only allow editing when reset
+
+            this.elements.display.classList.add('editing');
+            this.elements.display.contentEditable = true;
+            this.elements.display.focus();
+
+            // Select all text for easy editing
+            const range = document.createRange();
+            range.selectNodeContents(this.elements.display);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+        },
+
+        stopEditing() {
+            this.elements.display.classList.remove('editing');
+            this.elements.display.contentEditable = false;
+            this.validateAndSetTime();
+        },
+
+        handleKeyboardInput(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                this.stopEditing();
+                return;
+            }
+
+            // Only allow numbers, colon, and control keys
+            const allowedKeys = ['0','1','2','3','4','5','6','7','8','9',':','Backspace','Delete','ArrowLeft','ArrowRight','Tab'];
+            if (!allowedKeys.includes(e.key) && !e.ctrlKey && !e.metaKey) {
+                e.preventDefault();
+                return;
+            }
+
+            // Limit input length to 6 characters (e.g., "180000" for 180:00)
+            const currentText = this.elements.display.textContent.replace(':', ''); // Remove colon for counting
+            if (currentText.length >= 6 && !['Backspace','Delete'].includes(e.key)) {
+                e.preventDefault();
+                return;
+            }
+        },
+
+        validateAndSetTime() {
+            const text = this.elements.display.textContent.trim();
+
+            // Handle various input formats
+            let minutes = 0, seconds = 0;
+
+            // Try to match MM:SS format first
+            const colonMatch = text.match(/^(\d{1,2}):(\d{0,2})$/);
+            if (colonMatch) {
+                minutes = parseInt(colonMatch[1]) || 0;
+                seconds = parseInt(colonMatch[2]) || 0;
+            } else {
+                // Try to match just digits (treat as MM if 1-2 digits, MMSS if 3-4 digits, M:MMSS if 5-6 digits)
+                const digitMatch = text.match(/^(\d{1,6})$/);
+                if (digitMatch) {
+                    const digits = digitMatch[1];
+                    if (digits.length <= 2) {
+                        minutes = parseInt(digits) || 0;
+                        seconds = 0;
+                    } else if (digits.length <= 4) {
+                        minutes = parseInt(digits.slice(0, -2)) || 0;
+                        seconds = parseInt(digits.slice(-2)) || 0;
+                    } else {
+                        // For 5-6 digits, treat as M:MMSS (e.g., 180000 = 180:00)
+                        minutes = parseInt(digits.slice(0, -2)) || 0;
+                        seconds = parseInt(digits.slice(-2)) || 0;
+                    }
+                } else {
+                    // Invalid format, reset to current valid time
+                    this.updateDisplay();
+                    return;
+                }
+            }
+
+            // Validate individual components
+            minutes = Math.max(0, Math.min(minutes, 180)); // Allow up to 180 minutes
+            seconds = Math.max(0, Math.min(seconds, 59));
+
+            const totalSeconds = minutes * 60 + seconds;
+
+            // Input validation: min 10 seconds, max 3 hours (10800 seconds)
+            if (totalSeconds < 10) {
+                this.totalSeconds = 10;
+                this.currentSeconds = 10;
+            } else if (totalSeconds > 10800) {
+                this.totalSeconds = 10800;
+                this.currentSeconds = 10800;
+            } else {
+                this.totalSeconds = totalSeconds;
+                this.currentSeconds = totalSeconds;
+            }
+
+            this.updateDisplay();
+            this.updateProgress();
+        },
+
+        adjustTime(action) {
+            if (this.isRunning) {
+                // Adjust current time while running
+                if (action === 'add') {
+                    this.currentSeconds = Math.min(this.currentSeconds + 60, 10800); // Max 180 minutes
+                } else if (action === 'add-30') {
+                    this.currentSeconds = Math.min(this.currentSeconds + 30, 10800);
+                } else if (action === 'remove') {
+                    this.currentSeconds = Math.max(this.currentSeconds - 60, 0);
+                } else if (action === 'remove-30') {
+                    this.currentSeconds = Math.max(this.currentSeconds - 30, 0);
+                }
+                this.totalSeconds = this.currentSeconds; // Update total for progress
+            } else {
+                // Adjust total time when not running
+                if (action === 'add') {
+                    this.totalSeconds = Math.min(this.totalSeconds + 60, 10800);
+                    this.currentSeconds = this.totalSeconds;
+                } else if (action === 'add-30') {
+                    this.totalSeconds = Math.min(this.totalSeconds + 30, 10800);
+                    this.currentSeconds = this.totalSeconds;
+                } else if (action === 'remove') {
+                    this.totalSeconds = Math.max(this.totalSeconds - 60, 60);
+                    this.currentSeconds = this.totalSeconds;
+                } else if (action === 'remove-30') {
+                    this.totalSeconds = Math.max(this.totalSeconds - 30, 30);
+                    this.currentSeconds = this.totalSeconds;
+                }
+            }
+            this.updateDisplay();
+            this.updateProgress();
+        },
+
+        togglePlayPause() {
+            // If user is editing, commit the input first
+            if (this.elements.display.classList.contains('editing')) {
+                this.stopEditing();
+            }
+
+            if (this.isRunning) {
+                this.pause();
+            } else {
+                this.start();
+            }
+        },
+
+        start() {
+            if (this.currentSeconds === 0) {
+                this.reset();
+            }
+
+            // Play pleasant ting sound only when starting fresh, not resuming from pause
+            if (!this.isPaused) {
+                this.playTingSound();
+            }
+
+            this.isRunning = true;
+            this.isPaused = false;
+            this.elements.playBtn.classList.remove('timer-btn-play');
+            this.elements.playBtn.classList.add('timer-btn-pause');
+            this.elements.playBtn.innerHTML = `
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <rect x="6" y="4" width="4" height="16"/>
+                    <rect x="14" y="4" width="4" height="16"/>
+                </svg>
+            `;
+            this.elements.adjustments.classList.remove('hidden');
+            this.elements.display.classList.remove('editing');
+
+            this.interval = setInterval(() => {
+                this.currentSeconds--;
+                this.updateDisplay();
+                this.updateProgress();
+
+                // Play subtle beep for last 5 seconds (5, 4, 3, 2, 1)
+                if (this.currentSeconds <= 5 && this.currentSeconds > 0) {
+                    this.playCountdownBeep();
+                }
+
+                if (this.currentSeconds <= 0) {
+                    // Ensure display shows 00:00 before calling timesUp
+                    this.currentSeconds = 0;
+                    this.updateDisplay();
+                    this.updateProgress();
+                    this.timesUp();
+                }
+            }, 1000);
+        },
+
+        pause() {
+            this.isRunning = false;
+            this.isPaused = true;
+            clearInterval(this.interval);
+            this.elements.playBtn.classList.remove('timer-btn-pause');
+            this.elements.playBtn.classList.add('timer-btn-play');
+            this.elements.playBtn.innerHTML = `
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M8 5v14l11-7z"/>
+                </svg>
+            `;
+        },
+
+        reset() {
+            this.pause();
+            this.isPaused = false; // Clear paused state when resetting
+            this.currentSeconds = this.totalSeconds;
+            this.updateDisplay();
+            this.updateProgress();
+            this.elements.display.classList.remove('warning', 'danger', 'times-up');
+        },
+
+        timesUp() {
+            this.pause();
+            this.currentSeconds = 0;
+
+            // Create confetti effect immediately
+            createConfetti({ mode: 'continuous', duration: 10000 });
+
+            // Play elegant ending sound
+            this.playNotificationSound();
+
+            // Show Time's Up popup after a short delay
+            setTimeout(() => {
+                const popup = document.getElementById('timesUpPopup');
+                popup.classList.remove('hidden');
+
+                // Set up popup to close on any click
+                const closeHandler = () => {
+                    popup.classList.add('hidden');
+                    this.reset();
+                    this.totalSeconds = 180; // Reset to 3 minutes
+                    this.currentSeconds = 180;
+                    this.updateDisplay();
+                    this.updateProgress();
+                };
+
+                // Click on popup content or backdrop closes it
+                popup.addEventListener('click', closeHandler);
+            }, 500);
+        },
+
+        playNotificationSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+            // Create elegant ending chord with three harmonics
+            const playChord = () => {
+                // Fundamental note
+                const osc1 = audioContext.createOscillator();
+                const gain1 = audioContext.createGain();
+                osc1.connect(gain1);
+                gain1.connect(audioContext.destination);
+                osc1.frequency.value = 523.25; // C5
+                osc1.type = 'sine';
+                gain1.gain.setValueAtTime(0.15, audioContext.currentTime);
+                gain1.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 3);
+
+                // Perfect fifth
+                const osc2 = audioContext.createOscillator();
+                const gain2 = audioContext.createGain();
+                osc2.connect(gain2);
+                gain2.connect(audioContext.destination);
+                osc2.frequency.value = 783.99; // G5
+                osc2.type = 'sine';
+                gain2.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gain2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 3);
+
+                // Major third
+                const osc3 = audioContext.createOscillator();
+                const gain3 = audioContext.createGain();
+                osc3.connect(gain3);
+                gain3.connect(audioContext.destination);
+                osc3.frequency.value = 659.25; // E5
+                osc3.type = 'sine';
+                gain3.gain.setValueAtTime(0.08, audioContext.currentTime);
+                gain3.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 3);
+
+                // Start all oscillators
+                osc1.start(audioContext.currentTime);
+                osc2.start(audioContext.currentTime);
+                osc3.start(audioContext.currentTime);
+                osc1.stop(audioContext.currentTime + 3);
+                osc2.stop(audioContext.currentTime + 3);
+                osc3.stop(audioContext.currentTime + 3);
+            };
+
+            // Play elegant chord immediately, then repeat twice
+            playChord();
+            setTimeout(playChord, 3000);
+            setTimeout(playChord, 6000);
+        },
+
+        playTingSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+            // Create sharp ting with harmonic overtones
+            const osc1 = audioContext.createOscillator(); // Fundamental
+            const osc2 = audioContext.createOscillator(); // Octave harmonic
+            const gain1 = audioContext.createGain();
+            const gain2 = audioContext.createGain();
+
+            osc1.connect(gain1);
+            gain1.connect(audioContext.destination);
+            osc2.connect(gain2);
+            gain2.connect(audioContext.destination);
+
+            // Fundamental note - sharp, bright tone
+            osc1.frequency.value = 1600;
+            osc1.type = 'sine';
+            gain1.gain.setValueAtTime(0.25, audioContext.currentTime);
+            gain1.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+            // Octave harmonic for sharpness
+            osc2.frequency.value = 3200;
+            osc2.type = 'sine';
+            gain2.gain.setValueAtTime(0.15, audioContext.currentTime);
+            gain2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+            // Start both oscillators simultaneously
+            osc1.start(audioContext.currentTime);
+            osc2.start(audioContext.currentTime);
+            osc1.stop(audioContext.currentTime + 0.3);
+            osc2.stop(audioContext.currentTime + 0.3);
+        },
+
+        playCountdownBeep() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.2);
+        },
+
+        updateDisplay() {
+            const minutes = Math.floor(this.currentSeconds / 60);
+            const seconds = this.currentSeconds % 60;
+            const displayText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            if (!this.elements.display.classList.contains('editing') && this.currentSeconds > 0) {
+                this.elements.display.textContent = displayText;
+            }
+
+            // Update color based on time remaining
+            this.elements.display.classList.remove('warning', 'danger');
+            if (this.currentSeconds <= 5 && this.currentSeconds > 0) {
+                this.elements.display.classList.add('danger');
+                this.updateProgressGradient('red');
+            } else if (this.totalSeconds >= 1800 && this.currentSeconds <= 900 && this.currentSeconds > 0) {
+                // For timers 30 min (1800s) or longer, show warning at 15 min (900s)
+                this.elements.display.classList.add('warning');
+                this.updateProgressGradient('orange');
+            } else if (this.totalSeconds < 1800 && this.currentSeconds <= 60 && this.currentSeconds > 0) {
+                // For timers shorter than 30 min, show warning at 60 seconds
+                this.elements.display.classList.add('warning');
+                this.updateProgressGradient('orange');
+            } else {
+                this.updateProgressGradient('gold');
+            }
+        },
+
+        updateProgress() {
+            const progress = this.totalSeconds > 0 ? (this.totalSeconds - this.currentSeconds) / this.totalSeconds : 0;
+            const circumference = 2 * Math.PI * 135; // r = 135 (matching SVG)
+            const offset = circumference * progress;
+
+            this.elements.progress.style.strokeDashoffset = offset;
+        },
+
+        updateProgressGradient(color) {
+            const progressCircle = this.elements.progress;
+            if (color === 'orange') {
+                progressCircle.setAttribute('stroke', 'url(#orangeGradient)');
+                // Slow down the rotation animation for warning state
+                const rotateAnim = progressCircle.querySelector('animateTransform');
+                if (rotateAnim) rotateAnim.setAttribute('dur', '10s');
+            } else if (color === 'red') {
+                progressCircle.setAttribute('stroke', 'url(#redGradient)');
+                // Speed up rotation for danger state
+                const rotateAnim = progressCircle.querySelector('animateTransform');
+                if (rotateAnim) rotateAnim.setAttribute('dur', '5s');
+            } else {
+                progressCircle.setAttribute('stroke', 'url(#goldGradient)');
+                // Normal rotation speed
+                const rotateAnim = progressCircle.querySelector('animateTransform');
+                if (rotateAnim) rotateAnim.setAttribute('dur', '20s');
+            }
+        },
+
+        toggleFullscreen() {
+            const isFullscreen = this.elements.module.classList.contains('fullscreen');
+
+            if (isFullscreen) {
+                this.elements.module.classList.remove('fullscreen');
+                this.elements.fullscreenBtn.innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                    </svg>
+                `;
+            } else {
+                this.elements.module.classList.add('fullscreen');
+                this.elements.fullscreenBtn.innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M8 3v6l-3-3m11-3v6l3-3m-6 15v-6l3 3m-11 3v-6l-3 3"/>
+                    </svg>
+                `;
+
+                // Update progress circle for fullscreen
+                setTimeout(() => {
+                    this.updateProgress();
+                }, 100);
+            }
+        }
+    };
+
+    // Student Selector Fullscreen functionality - following timer pattern
+    const fullscreenToggleBtn = document.getElementById('fullscreenToggleBtn');
+    const studentSelectorContainer = document.getElementById('studentSelectorContainer');
+
+    fullscreenToggleBtn.addEventListener('click', () => {
+        const isFullscreen = studentSelectorContainer.classList.contains('fullscreen');
+
+        if (isFullscreen) {
+            studentSelectorContainer.classList.remove('fullscreen');
+            fullscreenToggleBtn.innerHTML = '⛶';
+            fullscreenToggleBtn.title = 'Fullscreen';
+        } else {
+            studentSelectorContainer.classList.add('fullscreen');
+            fullscreenToggleBtn.innerHTML = '⛶';
+            fullscreenToggleBtn.title = 'Exit Fullscreen';
+        }
+    });
+
+    // Exit fullscreen when clicking outside the content in fullscreen mode
+    studentSelectorContainer.addEventListener('click', (e) => {
+        // Check if we're in fullscreen mode
+        if (!studentSelectorContainer.classList.contains('fullscreen')) return;
+
+        // Check if click is outside the slot and controls (the actual content)
+        const slot = document.getElementById('slot');
+        const controls = studentSelectorContainer.querySelector('.controls');
+
+        if (!slot.contains(e.target) && !controls.contains(e.target)) {
+            studentSelectorContainer.classList.remove('fullscreen');
+            fullscreenToggleBtn.innerHTML = '⛶';
+            fullscreenToggleBtn.title = 'Fullscreen';
+        }
+    });
+
+    // Exit fullscreen on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && studentSelectorContainer.classList.contains('fullscreen')) {
+            studentSelectorContainer.classList.remove('fullscreen');
+            fullscreenToggleBtn.innerHTML = '⛶';
+            fullscreenToggleBtn.title = 'Fullscreen';
+        }
+    });
+
+    // Hide/show fullscreen button when switching between modes
+    const timerToggleBtn = document.getElementById('timerToggleBtn');
+    const timerModule = document.getElementById('timerModule');
+    const studentSelectorElements = [document.getElementById('slot'), document.querySelector('.controls')];
+
+    function updateFullscreenButtonVisibility() {
+        const isTimerVisible = !timerModule.classList.contains('hidden');
+        const isStudentSelectorVisible = studentSelectorElements.some(el => el && el.offsetParent !== null);
+
+        if (isTimerVisible) {
+            fullscreenToggleBtn.style.display = 'none';
+        } else if (isStudentSelectorVisible) {
+            fullscreenToggleBtn.style.display = 'flex';
+        }
+    }
+
+    timerToggleBtn.addEventListener('click', () => {
+        if (studentSelectorContainer.classList.contains('fullscreen')) {
+            studentSelectorContainer.classList.remove('fullscreen');
+            fullscreenToggleBtn.innerHTML = '⛶';
+            fullscreenToggleBtn.title = 'Fullscreen';
+        }
+
+        // Update fullscreen button visibility after mode switch
+        setTimeout(updateFullscreenButtonVisibility, 100);
+    });
+
+    // Initial visibility check
+    updateFullscreenButtonVisibility();
+
+    // Initialize timer module
+    timer.init();
 </script>
 </body>
 </html>
